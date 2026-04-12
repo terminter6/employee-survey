@@ -79,7 +79,8 @@ final class MoonShineUserFormPage extends FormPage
                             ->disk('public')
                             ->dir('moonshine_users')
                             ->allowedExtensions(['jpg', 'png', 'jpeg', 'gif'])
-                            ->modifyRawValue(fn (?string $raw): string => $raw ?? ''),
+                            ->modifyRawValue(fn (?string $raw): string => $raw ?? '')
+                            ->removable(),
 
                         Date::make(__('moonshine::ui.resource.created_at'), 'created_at')
                             ->format("d.m.Y")
