@@ -43,6 +43,8 @@ class QuestionController extends Controller
                 }
                 $data['options'] = !empty($values) ? json_encode(array_values($values)) : null;
             }
+        } else {
+            $data['options'] = null;
         }
 
         if ($request->hasFile('image')) {
@@ -94,6 +96,8 @@ class QuestionController extends Controller
                 }
                 $data['options'] = !empty($values) ? json_encode(array_values($values)) : null;
             }
+        } else {
+            $data['options'] = null;
         }
 
         if ($request->hasFile('image')) {

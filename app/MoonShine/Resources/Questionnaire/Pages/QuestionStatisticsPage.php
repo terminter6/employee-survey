@@ -8,7 +8,6 @@ use MoonShine\Laravel\Pages\Page;
 use MoonShine\Contracts\UI\ComponentContract;
 use MoonShine\UI\Components\Metrics\Wrapped\ValueMetric;
 use MoonShine\UI\Components\Layout\Flex;
-use MoonShine\UI\Components\FlexibleRender;
 use MoonShine\Apexcharts\Components\RawChartMetric;
 use App\Models\Question;
 use App\Models\Answer;
@@ -74,12 +73,11 @@ class QuestionStatisticsPage extends Page
         if ($question->type === 'text') {
             $totalCount = array_sum($chartData);
             $labels = [];
-            $percentData = [];
+            $counts = [];
 
             foreach ($chartData as $label => $count) {
-                $percent = $totalCount > 0 ? round(($count / $totalCount) * 100, 1) : 0;
                 $labels[] = $this->truncate((string) $label, 35);
-                $percentData[] = $percent;
+                $counts[] = $count;
             }
 
             return [
@@ -91,7 +89,7 @@ class QuestionStatisticsPage extends Page
                 RawChartMetric::make('Распределение ответов')
                     ->config([
                         'series' => [
-                            ['name' => '', 'data' => $percentData],
+                            ['name' => '', 'data' => $counts],
                         ],
                         'chart' => [
                             'type' => 'bar',
@@ -114,29 +112,21 @@ class QuestionStatisticsPage extends Page
                         'legend' => [
                             'show' => false,
                         ],
-                    ]),
-                FlexibleRender::make(<<<HTML
-<script>
-(function() {
-    function addPercentToBarLabels() {
-        document.querySelectorAll('.apexcharts-data-labels text, .apexcharts-datalabel text').forEach(function(el) {
-            if (el.textContent.length > 0 && el.textContent.trim() !== '' && !el.textContent.includes('%')) {
-                el.textContent = el.textContent.trim() + '%';
+                    ])
+                    ->jsChartEvents(<<<JS
+{
+    mounted: function(chartContext, config) {
+        var total = {$totalCount};
+        chartContext.updateOptions({
+            dataLabels: {
+                formatter: function(val) {
+                    return total > 0 ? ((val / total) * 100).toFixed(1) + '%' : '0%';
+                }
             }
         });
     }
-
-    const observer = new MutationObserver(addPercentToBarLabels);
-    document.querySelectorAll('.chart').forEach(function(chart) {
-        observer.observe(chart, { childList: true, subtree: true });
-    });
-
-    setTimeout(addPercentToBarLabels, 300);
-    setTimeout(addPercentToBarLabels, 600);
-    setTimeout(addPercentToBarLabels, 1000);
-})();
-</script>
-HTML),
+}
+JS),
             ];
         }
 

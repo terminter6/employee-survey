@@ -163,7 +163,14 @@ HTML),
 
         $formData = $question ? $question->toArray() : [];
         $formData['questionnaire_id'] = $questionnaire->id;
+
+        $typeSelectId = $isEdit ? "question-type-select-{$question->id}" : 'question-type-select';
+        $optionsFieldId = $isEdit ? "options-field-{$question->id}" : 'options-field';
+
         $options = $question ? $question->getOptionsArray() : [];
+        if (!empty($options)) {
+            $formData['options'] = array_map(fn ($opt) => ['text' => $opt], $options);
+        }
 
         $form = FormBuilderComponent::make($action)
             ->fields([
@@ -171,11 +178,11 @@ HTML),
                 Hidden::make('questionnaire_id'),
                 Text::make('Текст вопроса', 'text')
                     ->required()
-                    ->customAttributes(['id' => 'question-text', 'maxlength' => 255]),
+                    ->customAttributes(['id' => "question-text-{$typeSelectId}", 'maxlength' => 255]),
                 Select::make('Тип вопроса', 'type')
                     ->options(Question::getTypes())
                     ->required()
-                    ->customAttributes(['id' => 'question-type-select']),
+                    ->customAttributes(['id' => $typeSelectId]),
                 Image::make('Изображение', 'image')
                     ->disk('public')
                     ->dir('questions'),
@@ -183,12 +190,12 @@ HTML),
                 Divider::make(),
                 Json::make('Варианты ответов', 'options')
                     ->fields([
-                        Text::make('Ответ')
+                        Text::make('Ответ', 'text')
                             ->customAttributes(['maxlength' => 255]),
                     ])
                     ->removable()
                     ->creatable()
-                    ->customAttributes(['id' => 'options-field']),
+                    ->customAttributes(['id' => $optionsFieldId]),
             ])
             ->fill($formData)
             ->submit('Сохранить', ['class' => 'btn-primary'])
@@ -201,12 +208,12 @@ HTML),
         $script = <<<JS
         <script>
         (function() {
-            const typeSelect = document.getElementById('question-type-select');
-            const optionsField = document.getElementById('options-field');
+            const typeSelect = document.getElementById('{$typeSelectId}');
+            const optionsField = document.getElementById('{$optionsFieldId}');
             if (!typeSelect || !optionsField) return;
 
             const typesWithOptions = {$typesWithOptions};
-            const optionsContainer = optionsField.closest('.form-group') || optionsField.parentElement;
+            const optionsContainer = optionsField.closest('.form-group') || optionsField.closest('[data-field-wrapper]') || optionsField.parentElement;
 
             function updateVisibility() {
                 const showOptions = typesWithOptions.includes(typeSelect.value);
