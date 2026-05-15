@@ -49,7 +49,12 @@
                                       name="answers[{{ $question->id }}]"
                                       rows="3"
                                       placeholder="Ваш ответ..."
+                                      maxlength="1000"
+                                      oninput="document.getElementById('counter-{{ $question->id }}').textContent = this.value.length + '/1000'"
                                       {{ $question->is_required ? 'required' : '' }}></textarea>
+                            <div class="text-end mt-1">
+                                <small id="counter-{{ $question->id }}" class="text-secondary">0/1000</small>
+                            </div>
                         @elseif($question->type === 'single_choice')
                             <div class="d-flex flex-column gap-2">
                                 @foreach($question->getOptionsArray() as $optionIndex => $option)

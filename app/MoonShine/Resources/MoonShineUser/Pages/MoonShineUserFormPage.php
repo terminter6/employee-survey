@@ -57,10 +57,12 @@ final class MoonShineUserFormPage extends FormPage
 
                         Flex::make([
                             Text::make(__('moonshine::ui.resource.name'), 'name')
-                                ->required(),
+                                ->required()
+                                ->customAttributes(['maxlength' => 255]),
 
                             Email::make(__('moonshine::ui.resource.email'), 'email')
-                                ->required(),
+                                ->required()
+                                ->customAttributes(['maxlength' => 255]),
                         ]),
 
                         Flex::make([
@@ -94,13 +96,14 @@ final class MoonShineUserFormPage extends FormPage
     protected function rules(DataWrapperContract $item): array
     {
         return [
-            'name' => 'required',
+            'name' => ['required', 'string', 'max:255'],
             'moonshine_user_role_id' => 'required',
             'email' => [
                 'sometimes',
                 'bail',
                 'required',
                 'email',
+                'max:255',
                 Rule::unique('moonshine_users')->ignoreModel($item->getOriginal()),
             ],
             'avatar' => ['sometimes', 'nullable', 'image', 'mimes:jpeg,jpg,png,gif'],

@@ -31,7 +31,8 @@ class QuestionnaireCategoryFormPage extends FormPage
         return [
                 ID::make(),
                 Text::make('Название', 'name')
-                    ->required(),
+                    ->required()
+                    ->customAttributes(['maxlength' => 255]),
         ];
     }
 

@@ -11,6 +11,11 @@ class Questionnaire extends Model
         'name',
         'category_id',
         'hash',
+        'ends_at',
+    ];
+
+    protected $casts = [
+        'ends_at' => 'datetime',
     ];
 
     protected static function boot()
@@ -56,5 +61,18 @@ class Questionnaire extends Model
     public function getUrlAttribute(): string
     {
         return config('app.url') . '/questionnaire/' . $this->hash;
+    }
+
+    public function getIsActiveAttribute(): bool
+    {
+        if (!$this->ends_at) {
+            return true;
+        }
+        return now()->lt($this->ends_at);
+    }
+
+    public function getStatusLabelAttribute(): string
+    {
+        return $this->is_active ? 'Активен' : 'Неактивен';
     }
 }

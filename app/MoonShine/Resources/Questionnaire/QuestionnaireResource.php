@@ -10,12 +10,14 @@ use App\MoonShine\Resources\Questionnaire\Pages\QuestionnaireIndexPage;
 use App\MoonShine\Resources\Questionnaire\Pages\QuestionnaireFormPage;
 use App\MoonShine\Resources\Questionnaire\Pages\QuestionnaireDetailPage;
 use App\MoonShine\Resources\Questionnaire\Pages\MailFormPage;
+use App\MoonShine\Resources\Questionnaire\Pages\QuestionStatisticsPage;
 
 use MoonShine\Laravel\Resources\ModelResource;
 use MoonShine\Contracts\Core\PageContract;
 use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use MoonShine\Support\Enums\Ability;
+use MoonShine\Support\Enums\SortDirection;
 
 /**
  * @extends ModelResource<Questionnaire, QuestionnaireIndexPage, QuestionnaireFormPage, QuestionnaireDetailPage>
@@ -28,6 +30,10 @@ class QuestionnaireResource extends ModelResource
 
     protected string $column = 'name';
 
+    protected string $sortColumn = 'created_at';
+
+    protected SortDirection $sortDirection = SortDirection::DESC;
+
     public function can(Ability|string $ability): bool
     {
         return true;
@@ -35,7 +41,12 @@ class QuestionnaireResource extends ModelResource
 
     protected function modifyQueryBuilder(Builder $builder): Builder
     {
-        return $builder->withCount('questionnaireResults');
+        $now = now()->toDateTimeString();
+
+        return $builder
+            ->withCount('questionnaireResults')
+            ->orderByRaw("CASE WHEN ends_at IS NULL OR ends_at > ? THEN 0 ELSE 1 END", [$now])
+            ->orderBy('created_at', 'desc');
     }
 
     /**
@@ -49,6 +60,7 @@ class QuestionnaireResource extends ModelResource
             QuestionnaireDetailPage::class,
             MailFormPage::class,
             \App\MoonShine\Resources\Questionnaire\Pages\QuestionnaireResultsPage::class,
+            QuestionStatisticsPage::class,
         ];
     }
 

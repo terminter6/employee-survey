@@ -14,11 +14,10 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Получаем роли
+
         $superAdminRole = MoonshineUserRole::where('name', 'Super Admin')->first();
         $adminRole = MoonshineUserRole::where('name', 'Admin')->first();
 
-        // Создаём пользователей
         $users = [
             [
                 'name' => 'Менеджер',

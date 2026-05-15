@@ -14,10 +14,9 @@ class AllSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->command->info('🚀 Запуск комплексного сидера...');
+        $this->command->info('Запуск комплексного сидера...');
         
-        // Создаём роли
-        $this->command->info('📋 Создание ролей...');
+        $this->command->info('Создание ролей...');
         $superAdminRole = MoonshineUserRole::firstOrCreate(
             ['name' => 'Super Admin'],
             ['created_at' => now()]
@@ -26,9 +25,8 @@ class AllSeeder extends Seeder
             ['name' => 'Admin'],
             ['created_at' => now()]
         );
-        $this->command->info('✅ Роли созданы!');
+        $this->command->info('Роли созданы!');
 
-        // Создаём пользователей
         $this->command->info('👥 Создание пользователей...');
         $users = [
             [
@@ -69,12 +67,11 @@ class AllSeeder extends Seeder
                 $userData
             );
         }
-        $this->command->info('✅ Пользователи созданы!');
+        $this->command->info('Пользователи созданы!');
 
-        // Вывод информации
         $this->command->info('');
         $this->command->info('═══════════════════════════════════════════════════════');
-        $this->command->info('📊 Аккаунты для входа:');
+        $this->command->info('Аккаунты для входа:');
         $this->command->info('═══════════════════════════════════════════════════════');
         $this->command->info('superadmin@admin.com  | password | Super Admin');
         $this->command->info('survey@admin.com      | password | Admin');
@@ -82,7 +79,7 @@ class AllSeeder extends Seeder
         $this->command->info('operator@example.com  | password | Admin');
         $this->command->info('hr@example.com        | password | Admin');
         $this->command->info('═══════════════════════════════════════════════════════');
-        $this->command->warn('⚠️  Смените пароли после первого входа!');
+        $this->command->warn('Смените пароли после первого входа!');
         $this->command->info('');
     }
 }

@@ -15,14 +15,12 @@ class DataSeeder extends Seeder
 {
     public function run(): void
     {
-        // Отключаем проверки внешних ключей (для MySQL)
         if (DB::getDriverName() === 'mysql') {
             DB::statement('SET FOREIGN_KEY_CHECKS=0');
         } else {
             DB::statement('PRAGMA foreign_keys = OFF');
         }
 
-        // Очищаем все данные
         Answer::truncate();
         QuestionnaireResult::truncate();
         Question::truncate();
@@ -30,7 +28,6 @@ class DataSeeder extends Seeder
         QuestionnaireCategory::truncate();
         EmployeeEmail::truncate();
 
-        // Включаем проверки внешних ключей обратно
         if (DB::getDriverName() === 'mysql') {
             DB::statement('SET FOREIGN_KEY_CHECKS=1');
         } else {
@@ -39,16 +36,15 @@ class DataSeeder extends Seeder
 
         $this->command->info('Старые данные удалены!');
 
-        // Создаём категории
         $feedbackCategory = QuestionnaireCategory::create(['name' => 'Обратная связь']);
         $productCategory = QuestionnaireCategory::create(['name' => 'Оценка продукта']);
         $employeeCategory = QuestionnaireCategory::create(['name' => 'Оценка сотрудников']);
         $clientCategory = QuestionnaireCategory::create(['name' => 'Удовлетворённость клиентов']);
 
-        // Создаём опрос "Отзыв о мероприятии"
         $eventSurvey = Questionnaire::create([
             'name' => 'Отзыв о мероприятии',
             'category_id' => $feedbackCategory->id,
+            'ends_at' => now()->setSeconds(0)->addDays(3),
         ]);
 
         Question::create(['text' => 'Оцените организацию мероприятия', 'questionnaire_id' => $eventSurvey->id, 'type' => 'scale']);
@@ -57,10 +53,10 @@ class DataSeeder extends Seeder
         Question::create(['text' => 'Что понравилось больше всего?', 'questionnaire_id' => $eventSurvey->id, 'type' => 'text']);
         Question::create(['text' => 'Предложения на будущее', 'questionnaire_id' => $eventSurvey->id, 'type' => 'text']);
 
-        // Создаём опрос "Оценка нового продукта"
         $productSurvey = Questionnaire::create([
             'name' => 'Оценка нового продукта',
             'category_id' => $productCategory->id,
+            'ends_at' => now()->setSeconds(0)->addDays(30),
         ]);
 
         Question::create(['text' => 'Оцените качество продукта', 'questionnaire_id' => $productSurvey->id, 'type' => 'scale']);
@@ -68,10 +64,10 @@ class DataSeeder extends Seeder
         Question::create(['text' => 'Порекомендуете ли вы продукт друзьям?', 'questionnaire_id' => $productSurvey->id, 'type' => 'scale']);
         Question::create(['text' => 'Что можно улучшить в продукте?', 'questionnaire_id' => $productSurvey->id, 'type' => 'text']);
 
-        // Создаём опрос "Ежегодная оценка сотрудника"
         $employeeSurvey = Questionnaire::create([
             'name' => 'Ежегодная оценка сотрудника',
             'category_id' => $employeeCategory->id,
+            'ends_at' => now()->setSeconds(0)->addMonths(6),
         ]);
 
         Question::create(['text' => 'Оцените профессиональные навыки', 'questionnaire_id' => $employeeSurvey->id, 'type' => 'scale']);
@@ -80,10 +76,10 @@ class DataSeeder extends Seeder
         Question::create(['text' => 'Достижения за год', 'questionnaire_id' => $employeeSurvey->id, 'type' => 'text']);
         Question::create(['text' => 'Цели на следующий год', 'questionnaire_id' => $employeeSurvey->id, 'type' => 'text']);
 
-        // Создаём опрос "Обратная связь после покупки"
         $purchaseSurvey = Questionnaire::create([
             'name' => 'Обратная связь после покупки',
             'category_id' => $clientCategory->id,
+            'ends_at' => now()->setSeconds(0)->addDays(14),
         ]);
 
         Question::create(['text' => 'Оцените качество обслуживания', 'questionnaire_id' => $purchaseSurvey->id, 'type' => 'scale']);
@@ -91,8 +87,6 @@ class DataSeeder extends Seeder
         Question::create(['text' => 'Соответствует ли товар описанию?', 'questionnaire_id' => $purchaseSurvey->id, 'type' => 'scale']);
         Question::create(['text' => 'Комментарий к покупке', 'questionnaire_id' => $purchaseSurvey->id, 'type' => 'text']);
 
-        // Создаём тестовые прохождения для "Отзыв о мероприятии" с разными датами и разным количеством
-        // День -5: 1 прохождение
         $result = QuestionnaireResult::create([
             'questionnaire_id' => $eventSurvey->id,
             'created_at' => now()->subDays(5)->addHours(rand(0, 23))->addMinutes(rand(0, 59)),
@@ -103,7 +97,6 @@ class DataSeeder extends Seeder
         Answer::create(['questionnaire_result_id' => $result->id, 'question_id' => 4, 'text_value' => ['Спикеры', 'Контент', 'Организация'][rand(0, 2)]]);
         Answer::create(['questionnaire_result_id' => $result->id, 'question_id' => 5, 'text_value' => ['Больше таких мероприятий', 'Увеличить время'][rand(0, 1)]]);
 
-        // День -4: 3 прохождения
         for ($i = 0; $i < 3; $i++) {
             $result = QuestionnaireResult::create([
                 'questionnaire_id' => $eventSurvey->id,
@@ -116,9 +109,6 @@ class DataSeeder extends Seeder
             Answer::create(['questionnaire_result_id' => $result->id, 'question_id' => 5, 'text_value' => ['Больше таких мероприятий', 'Увеличить время', 'Добавить практику'][rand(0, 2)]]);
         }
 
-        // День -3: 0 прохождений (пропуск)
-
-        // День -2: 2 прохождения
         for ($i = 0; $i < 2; $i++) {
             $result = QuestionnaireResult::create([
                 'questionnaire_id' => $eventSurvey->id,
@@ -131,7 +121,6 @@ class DataSeeder extends Seeder
             Answer::create(['questionnaire_result_id' => $result->id, 'question_id' => 5, 'text_value' => ['Больше таких мероприятий', 'Увеличить время', 'Добавить практику', 'Частить встречи'][rand(0, 3)]]);
         }
 
-        // День -1: 1 прохождение
         $result = QuestionnaireResult::create([
             'questionnaire_id' => $eventSurvey->id,
             'created_at' => now()->subDay()->addHours(rand(0, 23))->addMinutes(rand(0, 59)),
@@ -142,7 +131,6 @@ class DataSeeder extends Seeder
         Answer::create(['questionnaire_result_id' => $result->id, 'question_id' => 4, 'text_value' => ['Спикеры', 'Контент', 'Организация'][rand(0, 2)]]);
         Answer::create(['questionnaire_result_id' => $result->id, 'question_id' => 5, 'text_value' => ['Больше таких мероприятий'][rand(0, 0)]]);
 
-        // День 0 (сегодня): 2 прохождения
         for ($i = 0; $i < 2; $i++) {
             $result = QuestionnaireResult::create([
                 'questionnaire_id' => $eventSurvey->id,
@@ -155,7 +143,6 @@ class DataSeeder extends Seeder
             Answer::create(['questionnaire_result_id' => $result->id, 'question_id' => 5, 'text_value' => ['Больше таких мероприятий', 'Увеличить время', ''][rand(0, 2)]]);
         }
 
-        // Создаём email сотрудников
         EmployeeEmail::create(['email' => 'ivanov@company.ru', 'name' => 'Иванов Иван']);
         EmployeeEmail::create(['email' => 'petrov@company.ru', 'name' => 'Петров Пётр']);
         EmployeeEmail::create(['email' => 'sidorov@company.ru', 'name' => 'Сидоров Сидор']);

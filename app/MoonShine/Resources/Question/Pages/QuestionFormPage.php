@@ -36,7 +36,8 @@ class QuestionFormPage extends FormPage
             Box::make([
                 ID::make(),
                 Text::make('Текст вопроса', 'text')
-                    ->required(),
+                    ->required()
+                    ->customAttributes(['maxlength' => 255]),
                 Select::make('Тип', 'type')
                     ->options(Question::getTypes())
                     ->required(),
@@ -46,7 +47,7 @@ class QuestionFormPage extends FormPage
                 Checkbox::make('Обязательный', 'is_required'),
                 Textarea::make('Варианты ответов (каждый с новой строки)', 'options')
                     ->hint('Заполняется для типов с выбором вариантов')
-                    ->customAttributes(['rows' => 4]),
+                    ->customAttributes(['rows' => 4, 'maxlength' => 255]),
             ]),
         ];
     }
@@ -64,7 +65,7 @@ class QuestionFormPage extends FormPage
     protected function rules(DataWrapperContract $item): array
     {
         return [
-            'text' => ['required', 'string', 'max:1000'],
+            'text' => ['required', 'string', 'max:255'],
             'type' => ['required', 'string'],
         ];
     }

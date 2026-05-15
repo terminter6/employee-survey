@@ -17,6 +17,7 @@ use MoonShine\Apexcharts\Support\SeriesItem;
 use App\Models\Questionnaire;
 use App\Models\QuestionnaireResult;
 use App\MoonShine\Resources\Questionnaire\QuestionnaireResource;
+use App\MoonShine\Resources\Questionnaire\Pages\QuestionStatisticsPage;
 
 class QuestionnaireResultsPage extends Page
 {
@@ -94,10 +95,22 @@ class QuestionnaireResultsPage extends Page
             ->orderBy('id')
             ->get();
 
+        $resource = moonshine()
+            ->getResources()
+            ->first(fn ($r) => $r instanceof QuestionnaireResource);
+
+        $statisticsPage = $resource?->getPages()->first(
+            fn ($p) => $p instanceof QuestionStatisticsPage
+        );
+
         $fields = [];
         foreach ($questions as $question) {
+            $url = $statisticsPage
+                ? $statisticsPage->getUrl() . '?questionnaire_id=' . $questionnaireId . '&question_id=' . $question->id
+                : '#';
+
             $fields[] = Text::make(
-                $question->text,
+                '<a href="' . $url . '" class="text-primary hover:underline">' . e($question->text) . '</a>',
                 'question_' . $question->id
             )->modifyRawValue(fn ($raw, $index, $ctx) => $ctx['question_' . $question->id] ?? '—');
         }

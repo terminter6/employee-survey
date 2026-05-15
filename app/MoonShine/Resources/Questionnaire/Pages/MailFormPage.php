@@ -75,19 +75,23 @@ class MailFormPage extends Page
                     ->fields([
                         Text::make('Опрос', 'questionnaire_name')
                             ->default($questionnaire->name)
-                            ->readonly(),
+                            ->readonly()
+                            ->customAttributes(['maxlength' => 255]),
 
                         Text::make('Ссылка на опрос', 'survey_url')
                             ->default($questionnaire->url)
-                            ->readonly(),
+                            ->readonly()
+                            ->customAttributes(['maxlength' => 255]),
 
                         Text::make('Тема письма', 'subject')
                             ->default('Приглашение пройти опрос')
-                            ->required(),
+                            ->required()
+                            ->customAttributes(['maxlength' => 255]),
 
                         Textarea::make('Текст сообщения', 'message')
                             ->default("Здравствуйте!\n\nПриглашаем вас принять участие в опросе. Пожалуйста, перейдите по ссылке ниже и ответьте на вопросы.")
-                            ->required(),
+                            ->required()
+                            ->customAttributes(['maxlength' => 255]),
 
                         Hidden::make('emails')
                             ->default($employeeEmails),

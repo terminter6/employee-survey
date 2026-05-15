@@ -29,8 +29,10 @@ class EmployeeEmailFormPage extends FormPage
     {
         return [
             ID::make(),
-            Text::make('Имя', 'name')->required(),
-            Text::make('Email', 'email')->required(),
+            Text::make('Имя', 'name')->required()
+                ->customAttributes(['maxlength' => 255]),
+            Text::make('Email', 'email')->required()
+                ->customAttributes(['maxlength' => 255]),
         ];
     }
 

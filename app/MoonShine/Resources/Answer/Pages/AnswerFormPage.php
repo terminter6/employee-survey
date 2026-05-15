@@ -42,7 +42,8 @@ class AnswerFormPage extends FormPage
                     ->options(Question::all()->pluck('text', 'id')->toArray())
                     ->required(),
                 Number::make('Ответ', 'scale_value'),
-                Text::make('Ответ', 'text_value'),
+                Text::make('Ответ', 'text_value')
+                    ->customAttributes(['maxlength' => 255]),
             ]),
         ];
     }
@@ -62,6 +63,7 @@ class AnswerFormPage extends FormPage
         return [
             'questionnaire_id' => ['required', 'integer', 'exists:questionnaires,id'],
             'question_id' => ['required', 'integer', 'exists:questions,id'],
+            'text_value' => ['nullable', 'string', 'max:255'],
         ];
     }
 

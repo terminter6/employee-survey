@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->foreignId('category_id')->constrained(table: 'questionnaire_categories')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->string('hash')->unique()->nullable();
+            $table->timestamp('ends_at')->nullable();
             $table->timestamps();
         });
     }

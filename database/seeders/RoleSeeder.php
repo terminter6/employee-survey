@@ -11,7 +11,7 @@ class RoleSeeder extends Seeder
 {
     public function run(): void
     {
-        // Создаём роли (только 2: Super Admin и admin)
+
         $superAdminRole = MoonshineUserRole::firstOrCreate(
             ['name' => 'Super Admin'],
             ['created_at' => now()]
@@ -22,7 +22,6 @@ class RoleSeeder extends Seeder
             ['created_at' => now()]
         );
 
-        // Создаём главного администратора
         MoonshineUser::updateOrCreate(
             ['email' => 'superadmin@admin.com'],
             [
@@ -34,7 +33,6 @@ class RoleSeeder extends Seeder
             ]
         );
 
-        // Создаём администратора
         MoonshineUser::updateOrCreate(
             ['email' => 'survey@admin.com'],
             [

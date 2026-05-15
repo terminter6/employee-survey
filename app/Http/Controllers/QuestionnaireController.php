@@ -12,12 +12,20 @@ class QuestionnaireController extends Controller
 {
     public function show(Questionnaire $questionnaire)
     {
+        if (! $questionnaire->is_active) {
+            return view('questionnaire.inactive', compact('questionnaire'));
+        }
+
         $questions = $questionnaire->questionRandomize();
         return view('questionnaire.questionnaire', compact('questionnaire', 'questions'));
     }
 
     public function store(Request $request, Questionnaire $questionnaire)
     {
+        if (! $questionnaire->is_active) {
+            return view('questionnaire.inactive', compact('questionnaire'));
+        }
+
         $request->validate([
             'g-recaptcha-response' => ['required'],
         ]);

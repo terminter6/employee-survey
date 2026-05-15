@@ -40,6 +40,7 @@ use MoonShine\UI\Fields\Switcher;
 use MoonShine\UI\Fields\Json;
 use Throwable;
 use MoonShine\UI\Components\Layout\Divider;
+use MoonShine\UI\Components\FlexibleRender;
 
 /**
  * @extends FormPage<QuestionnaireResource>
@@ -55,11 +56,42 @@ class QuestionnaireFormPage extends FormPage
             Box::make([
                 ID::make(),
                 Text::make('Название', 'name')
-                    ->required(),
+                    ->required()
+                    ->customAttributes(['maxlength' => 255]),
                 Select::make('Категория', 'category_id')
                     ->options(QuestionnaireCategory::all()->pluck('name', 'id')->toArray())
                     ->required(),
+                Date::make('Дата окончания', 'ends_at')
+                    ->withTime()
+                    ->customAttributes(['min' => now()->format('Y-m-d\TH:i')]),
             ]),
+            FlexibleRender::make(<<<HTML
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const endsAtInput = document.querySelector('input[name="ends_at"]');
+    if (!endsAtInput) return;
+
+    endsAtInput.addEventListener('change', function() {
+        const val = this.value;
+        if (!val) return;
+
+        const now = new Date();
+        const selected = new Date(val);
+
+        const diff = Math.abs(selected - now);
+        if (diff < 60000) {
+            const newDate = new Date(selected.getTime() + 3 * 60000);
+            const yyyy = newDate.getFullYear();
+            const mm = String(newDate.getMonth() + 1).padStart(2, '0');
+            const dd = String(newDate.getDate()).padStart(2, '0');
+            const hh = String(newDate.getHours()).padStart(2, '0');
+            const mi = String(newDate.getMinutes()).padStart(2, '0');
+            this.value = yyyy + '-' + mm + '-' + dd + 'T' + hh + ':' + mi;
+        }
+    });
+});
+</script>
+HTML),
             Box::make($this->getQuestionsBlock())->name('Вопросы'),
         ];
     }
@@ -139,7 +171,7 @@ class QuestionnaireFormPage extends FormPage
                 Hidden::make('questionnaire_id'),
                 Text::make('Текст вопроса', 'text')
                     ->required()
-                    ->customAttributes(['id' => 'question-text']),
+                    ->customAttributes(['id' => 'question-text', 'maxlength' => 255]),
                 Select::make('Тип вопроса', 'type')
                     ->options(Question::getTypes())
                     ->required()
@@ -151,7 +183,8 @@ class QuestionnaireFormPage extends FormPage
                 Divider::make(),
                 Json::make('Варианты ответов', 'options')
                     ->fields([
-                        Text::make('Ответ'),
+                        Text::make('Ответ')
+                            ->customAttributes(['maxlength' => 255]),
                     ])
                     ->removable()
                     ->creatable()
@@ -221,8 +254,18 @@ class QuestionnaireFormPage extends FormPage
         return [
             'name' => ['required', 'string', 'max:255'],
             'category_id' => ['required', 'integer', 'exists:questionnaire_categories,id'],
+            'ends_at' => ['nullable', 'after_or_equal:' . now()->startOfMinute()->toDateTimeString()],
         ];
     }
+
+    public function validationMessages(): array
+    {
+        return [
+            'ends_at.after_or_equal' => 'Дата окончания не может быть раньше текущего времени.',
+        ];
+    }
+
+
 
     /**
      * @param  FormBuilder  $component

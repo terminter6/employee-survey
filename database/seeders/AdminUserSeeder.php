@@ -11,19 +11,16 @@ class AdminUserSeeder extends Seeder
 {
     public function run(): void
     {
-        // Создаём роль Super Admin, если не существует
         $superAdminRole = MoonshineUserRole::firstOrCreate(
             ['name' => 'Super Admin'],
             ['created_at' => now()]
         );
 
-        // Создаём роль Admin, если не существует
         $adminRole = MoonshineUserRole::firstOrCreate(
             ['name' => 'Admin'],
             ['created_at' => now()]
         );
 
-        // Создаём главного администратора (Super Admin)
         MoonshineUser::updateOrCreate(
             ['email' => 'superadmin@admin.com'],
             [
@@ -35,7 +32,6 @@ class AdminUserSeeder extends Seeder
             ]
         );
 
-        // Создаём обычного администратора
         MoonshineUser::updateOrCreate(
             ['email' => 'admin@admin.com'],
             [

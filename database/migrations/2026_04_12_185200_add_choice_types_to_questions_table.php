@@ -17,7 +17,6 @@ return new class extends Migration
         if ($driver === 'mysql') {
             DB::statement("ALTER TABLE `questions` MODIFY COLUMN `type` ENUM('scale', 'text', 'single_choice', 'multiple_choice') NOT NULL");
         } else {
-            // Для SQLite: пересоздаём таблицу с новым enum
             Schema::table('questions', function (Blueprint $table) {
                 $table->string('type_temp')->nullable();
             });
@@ -41,7 +40,6 @@ return new class extends Migration
         if ($driver === 'mysql') {
             DB::statement("ALTER TABLE `questions` MODIFY COLUMN `type` ENUM('scale', 'text') NOT NULL");
         } else {
-            // Для SQLite просто оставляем как есть
         }
     }
 };

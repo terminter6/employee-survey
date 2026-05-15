@@ -27,14 +27,15 @@ final class MoonShineUserRoleFormPage extends FormPage
         return [
                 ID::make(),
                 Text::make(__('moonshine::ui.resource.role_name'), 'name')
-                    ->required(),
+                    ->required()
+                    ->customAttributes(['maxlength' => 255]),
         ];
     }
 
     protected function rules(DataWrapperContract $item): array
     {
         return [
-            'name' => ['required', 'min:5'],
+            'name' => ['required', 'min:5', 'max:255'],
         ];
     }
 }
