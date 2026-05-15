@@ -8,6 +8,7 @@ use MoonShine\Laravel\Pages\Page;
 use MoonShine\Contracts\UI\ComponentContract;
 use MoonShine\UI\Components\Metrics\Wrapped\ValueMetric;
 use MoonShine\UI\Components\Layout\Flex;
+use MoonShine\UI\Components\FlexibleRender;
 use MoonShine\Apexcharts\Components\RawChartMetric;
 use App\Models\Question;
 use App\Models\Answer;
@@ -71,7 +72,15 @@ class QuestionStatisticsPage extends Page
         $chartData = $this->getChartData($question);
 
         if ($question->type === 'text') {
-            $labels = array_map(fn ($label) => $this->truncate($label, 35), array_keys($chartData));
+            $totalCount = array_sum($chartData);
+            $labels = [];
+            $percentData = [];
+
+            foreach ($chartData as $label => $count) {
+                $percent = $totalCount > 0 ? round(($count / $totalCount) * 100, 1) : 0;
+                $labels[] = $this->truncate($label, 35);
+                $percentData[] = $percent;
+            }
 
             return [
                 Flex::make([
@@ -82,7 +91,7 @@ class QuestionStatisticsPage extends Page
                 RawChartMetric::make('Распределение ответов')
                     ->config([
                         'series' => [
-                            ['name' => 'Количество', 'data' => array_values($chartData)],
+                            ['name' => '', 'data' => $percentData],
                         ],
                         'chart' => [
                             'type' => 'bar',
@@ -106,6 +115,28 @@ class QuestionStatisticsPage extends Page
                             'show' => false,
                         ],
                     ]),
+                FlexibleRender::make(<<<HTML
+<script>
+(function() {
+    function addPercentToBarLabels() {
+        document.querySelectorAll('.apexcharts-data-labels text, .apexcharts-datalabel text').forEach(function(el) {
+            if (el.textContent.length > 0 && el.textContent.trim() !== '' && !el.textContent.includes('%')) {
+                el.textContent = el.textContent.trim() + '%';
+            }
+        });
+    }
+
+    const observer = new MutationObserver(addPercentToBarLabels);
+    document.querySelectorAll('.chart').forEach(function(chart) {
+        observer.observe(chart, { childList: true, subtree: true });
+    });
+
+    setTimeout(addPercentToBarLabels, 300);
+    setTimeout(addPercentToBarLabels, 600);
+    setTimeout(addPercentToBarLabels, 1000);
+})();
+</script>
+HTML),
             ];
         }
 
