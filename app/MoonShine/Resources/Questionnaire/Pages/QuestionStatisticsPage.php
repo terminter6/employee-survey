@@ -78,7 +78,7 @@ class QuestionStatisticsPage extends Page
 
             foreach ($chartData as $label => $count) {
                 $percent = $totalCount > 0 ? round(($count / $totalCount) * 100, 1) : 0;
-                $labels[] = $this->truncate($label, 35);
+                $labels[] = $this->truncate((string) $label, 35);
                 $percentData[] = $percent;
             }
 
