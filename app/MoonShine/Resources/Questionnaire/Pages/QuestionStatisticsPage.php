@@ -70,6 +70,45 @@ class QuestionStatisticsPage extends Page
         $total = Answer::where('question_id', $question->id)->count();
         $chartData = $this->getChartData($question);
 
+        if ($question->type === 'text') {
+            $labels = array_map(fn ($label) => $this->truncate($label, 35), array_keys($chartData));
+
+            return [
+                Flex::make([
+                    ValueMetric::make('Всего ответов')
+                        ->value($total),
+                ])->justifyAlign('between'),
+
+                RawChartMetric::make('Распределение ответов')
+                    ->config([
+                        'series' => [
+                            ['name' => 'Количество', 'data' => array_values($chartData)],
+                        ],
+                        'chart' => [
+                            'type' => 'bar',
+                            'height' => max(300, count($chartData) * 40 + 100),
+                        ],
+                        'plotOptions' => [
+                            'bar' => [
+                                'horizontal' => true,
+                                'borderRadius' => 4,
+                                'distributed' => true,
+                            ],
+                        ],
+                        'colors' => $this->generateColors(count($chartData)),
+                        'xaxis' => [
+                            'categories' => $labels,
+                        ],
+                        'dataLabels' => [
+                            'enabled' => true,
+                        ],
+                        'legend' => [
+                            'show' => false,
+                        ],
+                    ]),
+            ];
+        }
+
         return [
             Flex::make([
                 ValueMetric::make('Всего ответов')
@@ -146,5 +185,35 @@ class QuestionStatisticsPage extends Page
         return $data;
     }
 
+    private function truncate(string $text, int $length = 35): string
+    {
+        if (mb_strlen($text) <= $length) {
+            return $text;
+        }
 
+        return mb_substr($text, 0, $length) . '…';
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function generateColors(int $count): array
+    {
+        $colors = [];
+        $goldenRatio = 0.618033988749895;
+        $hue = 0.5;
+
+        for ($i = 0; $i < $count; $i++) {
+            $hue += $goldenRatio;
+            $hue -= floor($hue);
+
+            $h = (int) ($hue * 360);
+            $s = 70 + ($i % 2) * 10;
+            $l = 50 + ($i % 3) * 5;
+
+            $colors[] = "hsl({$h}, {$s}%, {$l}%)";
+        }
+
+        return $colors;
+    }
 }
