@@ -26,9 +26,21 @@ class QuestionnaireController extends Controller
             return view('questionnaire.inactive', compact('questionnaire'));
         }
 
-        $request->validate([
+        $questionnaire->load('questions');
+
+        $rules = [
             'g-recaptcha-response' => ['required'],
-        ]);
+        ];
+
+        foreach ($questionnaire->questions as $question) {
+            if ($question->type === 'text') {
+                $rules["answers.{$question->id}"] = ['nullable', 'string', 'max:1000'];
+            } elseif ($question->type === 'multiple_choice') {
+                $rules["answers.{$question->id}.*"] = ['nullable', 'string', 'max:1000'];
+            }
+        }
+
+        $request->validate($rules);
 
         $recaptchaResponse = $request->input('g-recaptcha-response');
         $recaptchaSecret = config('services.recaptcha.secret_key');
@@ -44,8 +56,6 @@ class QuestionnaireController extends Controller
         if (!$result || !($result['success'] ?? false)) {
             return back()->withErrors(['g-recaptcha-response' => 'Ошибка проверки reCAPTCHA. Пожалуйста, попробуйте снова.']);
         }
-
-        $questionnaire->load('questions');
 
         $questionnaireResult = QuestionnaireResult::create([
             'questionnaire_id' => $questionnaire->id,
